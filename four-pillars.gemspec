@@ -1,9 +1,9 @@
 Gem::Specification.new do |s|
   s.name        = 'four-pillars'
-  s.version     = '0.1.0'
+  s.version     = '0.1.1'
   s.date        = '2020-07-30'
-  s.summary     = "Fortune telling"
-  s.description = "Tell your meishiki from your birthday and time."
+  s.summary     = "Four Pillar astrology"
+  s.description = "A class which tells fortune by Four Pillar astrology(四柱推命)."
   s.authors     = ["Yosei Ito"]
   s.email       = 'y-itou@lumber-mill.co.jp'
   s.files       = ["lib/four-pillars.rb","lib/four-pillars-setsuiri.txt"]

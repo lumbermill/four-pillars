@@ -1,37 +1,45 @@
 # four-pillars
-四柱推命
+A class which tells fortune by Four Pillar astrology(四柱推命).
 
-
-## コマンドラインで試す
-
-```
-ruby railsapp/lib/tasks/four-pillars.rb -h
-```
-
-## 開発用のイメージを立ち上げる
-[Docker Desktop on Mac](https://docs.docker.com/docker-for-mac/install/) をインストールしてください。
+## Installation
 
 ```
-docker-compose up
+sudo gem install four-pillars
 ```
 
-## Herokuにデプロイする
+## Usage
 
 ```
-git subtree push --prefix railsapp heroku master
-```
-https://four-pillars.herokuapp.com/
+require 'four-pillars'
 
-## 参考
-[Getting Started on Heroku with Ruby](https://devcenter.heroku.com/articles/getting-started-with-ruby)
-[日本推命協会](http://suimeikyokai.com/profile.html)
-[干支カレンダー](https://keisan.casio.jp/exec/system/1189949688)
-[愛され四柱推命](http://aisare-fourpillars.info/)
+fp = FourPillarsLogic.new([1980,7,18,0,0],'f')
+puts fp.input
+#=> 1980年7月18日0時0分生 女性
+p fp.kanshi
+#=> ["壬辰", "癸未", "庚申"]
+p fp.kanshi_as_number
+#=> [29, 20, 57]
+p fp.zokan
+#=> ["癸", "乙", "壬"]
+p fp.setsuiri?
+#=> false
+```
+
+See test cases for more methods.
+
+
+## Contributors
+- Kie Fukazawa [五行アロマx四柱推命](https://meishiki.5aroma-4pillars.com/)
+
+## References
+- [日本推命協会](http://suimeikyokai.com/profile.html)
+- [干支カレンダー](https://keisan.casio.jp/exec/system/1189949688)
+- [愛され四柱推命](http://aisare-fourpillars.info/)
 
 - 書籍
   - 四柱推命の事典,平古場泰義
 
-## 通変星
+### 通変星
 
 ```
 いんじゅ 印綬
@@ -46,7 +54,7 @@ https://four-pillars.herokuapp.com/
 しょくじん 食神
 ```
 
-## 十干
+### 十干
 
 ```
 きのえ 甲
@@ -61,7 +69,7 @@ https://four-pillars.herokuapp.com/
 みずのと 癸
 ```
 
-## 十二支
+### 十二支
 
 ```
 い 亥
@@ -78,7 +86,7 @@ https://four-pillars.herokuapp.com/
 いぬ 戌
 ```
 
-## 十二運星
+### 十二運星
 
 ```
 たい 胎

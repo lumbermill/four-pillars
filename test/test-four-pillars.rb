@@ -66,11 +66,13 @@ puts fp.input
 assert(true,fp.know_setsuiri?)
 assert(["己巳","乙丑","癸亥"],fp.kanshi)
 assert(["戌亥","子丑"],fp.kuubou)
+assert("丙甲",fp.shugoshin)
 fp = FourPillarsLogic.new(["1984","2","5","0","19"],"m")
 puts fp.input
 assert(true,fp.know_setsuiri?)
 assert(["己巳","丙寅","甲子"],fp.kanshi)
 assert(["戌亥","戌亥"],fp.kuubou)
+assert("丙戊甲",fp.shugoshin)
 
 fp = FourPillarsLogic.new(["1983","12","16","13","20"],"f")
 puts fp.input
@@ -87,6 +89,7 @@ assert(["長生","胎","絶"],fp.jyuniunsei)
 assert([9,3,1],fp.jyuniunsei_energy)
 assert(13,fp.jyuniunsei_energy.sum)
 assert(["申酉","子丑"],fp.kuubou)
+assert("丙甲",fp.shugoshin)
 
 fp = FourPillarsLogic.new(["1999","2","4","15","50"],"f")
 puts fp.input
@@ -94,6 +97,7 @@ assert(true,fp.know_setsuiri?)
 assert(["丁亥","乙丑","戊寅"],fp.kanshi)
 assert(30,fp.zokan_number)
 assert(["壬","己","甲"],fp.zokan)
+assert("甲庚",fp.shugoshin)
 
 fp = FourPillarsLogic.new(["1999","2","4","16","00"],"f")
 puts fp.input
@@ -101,3 +105,4 @@ assert(true,fp.know_setsuiri?)
 assert(["丁亥","丙寅","己卯"],fp.kanshi)
 assert(1,fp.zokan_number)
 assert(["甲","戊","乙"],fp.zokan)
+assert("甲庚",fp.shugoshin)

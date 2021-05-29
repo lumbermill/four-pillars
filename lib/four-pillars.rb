@@ -313,11 +313,33 @@ class FourPillarsLogic
     return arr
   end
 
+  # 守護神
   def shugoshin
     # 日柱の十干と月柱の十二支
     x = JIKKAN.index(kanshi[0][0])
     y = JYUNISHI.index(kanshi[1][1])
     SHUGOSHIN[y][x]
+  end
+
+  # 宿命中殺
+  def shukumei
+    s = []
+    t = kuubou # 天中殺 0:上段, 1:下段
+    k = kanshi.map {|v| v[1] } # 日,月,年柱の干支
+    if t[0].include? k[2]
+      s += ["生年中殺"]
+    end
+    if t[0].include? k[1]
+      s += ["生月中殺"]
+    end
+    if t[1].include? k[0]
+      s += ["生日中殺"]
+    end
+    f = false
+    f = true if kanshi_as_number.include? 11 #甲戌
+    f = true if kanshi_as_number.include? 12 #乙亥
+    s += ["日座中殺"] if f
+    return s
   end
 end
 

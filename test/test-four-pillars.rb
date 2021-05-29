@@ -33,6 +33,7 @@ assert(["病","死","絶"],fp.jyuniunsei)
 assert([4,2,1],fp.jyuniunsei_energy)
 assert(7,fp.jyuniunsei_energy.sum)
 assert(["申酉","戌亥"],fp.kuubou)
+assert([],fp.shukumei)
 
 fp = FourPillarsLogic.new(["2019","10","25","16","38"],"m")
 puts fp.input
@@ -49,6 +50,7 @@ assert(["養","墓","死"],fp.jyuniunsei)
 assert([6,5,2],fp.jyuniunsei_energy)
 assert(13,fp.jyuniunsei_energy.sum)
 assert(["辰巳","辰巳"],fp.kuubou)
+assert(["日座中殺"],fp.shukumei)
 
 # 節入
 fp = FourPillarsLogic.new(["2020","2","4","18","2"],"m")

@@ -318,7 +318,7 @@ class FourPillarsLogic
     # 日柱の十干と月柱の十二支
     x = JIKKAN.index(kanshi[0][0])
     y = JYUNISHI.index(kanshi[1][1])
-    SHUGOSHIN[y][x]
+    SHUGOSHIN[y][x].split("")
   end
 
   # 宿命中殺
@@ -341,6 +341,44 @@ class FourPillarsLogic
     s += ["日座中殺"] if f
     return s
   end
+
+  def equivalent_kanshi(only_jikkan=false)
+    if only_jikkan
+      k = kanshi.map {|v| v[0] } # 日,月,年柱の十干
+    else
+      k = kanshi
+    end
+    if k[0] == k[1] == k[2]
+      return [0,1,2]
+    elsif k[0] == k[1]
+      return [0,1]
+    elsif k[0] == k[2]
+      return [0,2]
+    elsif k[1] == k[2]
+      return [1,2]
+    else
+      return []
+    end
+  end
+
+  # 律音
+  def ricchin
+    # 干支(十干・十二支)が同じ
+    equivalent_kanshi(false)
+  end
+
+  # 納音
+  def nacchinn
+    # 十干が同じで十二支が 沖 の関係にある
+    eq = equivalent_kanshi(true)
+  end
+
+  # 宿命大半会
+  def shukumei_daihankai
+    # 十干が同じで十二支が三合会局の関係にある
+    eq = equivalent_kanshi(true)
+  end
+
 end
 
 if __FILE__ == $0

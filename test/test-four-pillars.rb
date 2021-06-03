@@ -5,6 +5,7 @@ def assert(expected,actual)
     expected == true || expected == false || expected == nil
     raise "Expected: #{expected}, Actual: #{actual}" unless expected == actual
   elsif expected.is_a? Array
+    raise "Expected: #{expected}, Actual: #{actual}" if expected.count != actual.count
     expected.each_with_index do |e,i|
       assert(e,actual[i])
     end
@@ -130,3 +131,30 @@ assert(["甲","庚"],fp.shugoshin)
 assert([],fp.ricchin)
 assert([],fp.nacchin)
 assert([],fp.shukumei_daihankai)
+
+# 律音、納音
+fp = FourPillarsLogic.new(["1970","9","27","10","00"],"m")
+puts fp.input
+assert([[0,2]],fp.ricchin)
+assert([],fp.nacchin)
+
+fp = FourPillarsLogic.new(["1948","11","29","10","00"],"m")
+puts fp.input
+assert([],fp.ricchin)
+assert([[0,2]],fp.nacchin)
+
+fp = FourPillarsLogic.new(["1970","4","30","10","00"],"m")
+puts fp.input
+assert(["庚辰","庚辰","庚戌"],fp.kanshi)
+assert([[0,1]],fp.ricchin)
+assert([[0,2],[1,2]],fp.nacchin)
+assert([],fp.shukumei_daihankai)
+
+# 宿命大半会
+fp = FourPillarsLogic.new(["1969","6","1","10","00"],"m")
+puts fp.input
+assert([[1,2]],fp.shukumei_daihankai)
+
+fp = FourPillarsLogic.new(["1960","4","29","10","00"],"m")
+puts fp.input
+assert([[1,2]],fp.shukumei_daihankai)

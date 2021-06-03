@@ -348,7 +348,7 @@ class FourPillarsLogic
     else
       k = kanshi
     end
-    if k[0] == k[1] == k[2]
+    if k[0] == k[1] && k[1] == k[2]
       return [0,1,2]
     elsif k[0] == k[1]
       return [0,1]
@@ -361,6 +361,11 @@ class FourPillarsLogic
     end
   end
 
+  def on_distance?(j1,j2,d=6)
+    i = JYUNISHI.index(j1)
+    return j2 == JYUNISHI[(i+d) % 12]
+  end
+
   # 律音
   def ricchin
     # 干支(十干・十二支)が同じ
@@ -368,15 +373,45 @@ class FourPillarsLogic
   end
 
   # 納音
-  def nacchinn
+  def nacchin
     # 十干が同じで十二支が 沖 の関係にある
     eq = equivalent_kanshi(true)
+    case eq.count
+    when 0 then
+      return []
+    when 2 then
+      k0 = kanshi[eq[0]][1]
+      k1 = kanshi[eq[1]][1]
+      if on_distance?(k0,k1,6)
+        return eq
+      else
+        return []
+      end
+    when 3 then
+      raise "not implemented."
+    end
   end
 
   # 宿命大半会
   def shukumei_daihankai
     # 十干が同じで十二支が三合会局の関係にある
     eq = equivalent_kanshi(true)
+    case eq.count
+    when 0 then
+      return []
+    when 2 then
+      k0 = kanshi[eq[0]][1]
+      k1 = kanshi[eq[1]][1]
+      if on_distance?(k0,k1,4)
+        return eq
+      elsif on_distance?(k0,k1,8)
+        return eq
+      else
+        return []
+      end
+    when 3 then
+      raise "not implemented."
+    end
   end
 
 end

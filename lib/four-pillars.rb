@@ -425,13 +425,19 @@ class FourPillarsLogic
   def taiun
     return [nil,nil] unless ['m','f'].include? @gender
     k = gogyo_jikkan[2][0]
+    t = @birth_dt[3] * 60 + @birth_dt[4] # 生まれた時間
     if (@gender == 'm' && k == "+") || (@gender == 'f' && k == '-')
       order = "順行"
       d = setsuiri[0] - birth_dt[2]
       if d > 0 # A 生まれた日が節入り前の場合 (節入り日―誕生日＋１)÷３
         year = ((d + 1) / 3.0).round
       elsif d == 0 # 節入り日
-        year = nil # TODO
+        #〈順行〉節入時間「前」=1年  「後」=10年
+        if t <= setsuiri[1]
+          year = 1
+        else
+          year = 10
+        end
       else # B 生まれた日が節入り後の場合  (誕生月の日数―誕生日＋１＋翌月の節入り日)÷３
         s = days_of_current_month - birth_dt[2] + 1 + setsuiri_of_next_month[0]
         year = (s / 3.0).round
@@ -439,7 +445,12 @@ class FourPillarsLogic
     else
       order = "逆行"
       if setsuiri?
-        year = nil # TODO
+        #〈逆行〉節入時間「前」=10年 「後」=1年
+        if t < setsuiri[1]
+          year = 10
+        else
+          year = 1
+        end
       else
         year = (zokan_number / 3.0).round
       end

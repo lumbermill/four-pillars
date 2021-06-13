@@ -185,3 +185,27 @@ assert([7,818],fp.setsuiri)
 assert("癸亥",fp.kanshi[1])
 assert("+土",fp.gogyo_jikkan[2])
 assert(['順行',1],fp.taiun)
+
+fp = FourPillarsLogic.new(["1948","12","7","13","37"],"m")
+puts fp.input
+assert(['順行',1],fp.taiun)
+
+fp = FourPillarsLogic.new(["1948","12","7","13","38"],"m")
+puts fp.input
+assert(['順行',1],fp.taiun)
+
+fp = FourPillarsLogic.new(["1948","12","7","13","39"],"m")
+puts fp.input
+assert(['順行',10],fp.taiun)
+
+fp = FourPillarsLogic.new(["1948","12","7","13","37"],"f")
+puts fp.input
+assert(['逆行',10],fp.taiun)
+
+fp = FourPillarsLogic.new(["1948","12","7","13","38"],"f")
+puts fp.input
+assert(['逆行',1],fp.taiun)
+
+fp = FourPillarsLogic.new(["1948","12","7","13","39"],"f")
+puts fp.input
+assert(['逆行',1],fp.taiun)

@@ -84,7 +84,7 @@ class FourPillarsLogic
   end
   SETSUIRI_HASH, SETSUIRI_LIST = load_setsuiri
 
-  # 生年月日時間, 性別(鑑定には使用しない)
+  # 生年月日時間, 性別(大運の向きに使用)
   attr_reader :birth_dt,:gender
 
   def initialize(birth_dt,gender)
@@ -115,6 +115,12 @@ class FourPillarsLogic
     (Date.new(y,m,1) - 1).day
   end
 
+  # 今月の日数
+  def days_of_current_month
+    y,m,d,h,i = @birth_dt
+    Date.new(y,m,1).next_month.prev_day.day
+  end
+
   # 前月の節入日
   def setsuiri_of_previous_month
     y,m,d,h,i = @birth_dt
@@ -123,6 +129,18 @@ class FourPillarsLogic
       m = 12
     else
       m -= 1
+    end
+    SETSUIRI_HASH[y*100+m] || [0,0]
+  end
+
+  # 翌月の節入日
+  def setsuiri_of_next_month
+    y,m,d,h,i = @birth_dt
+    if m == 12
+      y += 1
+      m = 1
+    else
+      m += 1
     end
     SETSUIRI_HASH[y*100+m] || [0,0]
   end
@@ -401,6 +419,32 @@ class FourPillarsLogic
       v += [e] if on_distance?(k0,k1,8)
     end
     return v
+  end
+
+  # 大運 [順行 or 逆行, year] or [nil,nil](if gender is not male nor female)
+  def taiun
+    return [nil,nil] unless ['m','f'].include? @gender
+    k = gogyo_jikkan[2][0]
+    if (@gender == 'm' && k == "+") || (@gender == 'f' && k == '-')
+      order = "順行"
+      d = setsuiri[0] - birth_dt[2]
+      if d > 0 # A 生まれた日が節入り前の場合 (節入り日―誕生日＋１)÷３
+        year = ((d + 1) / 3.0).round
+      elsif d == 0 # 節入り日
+        year = nil # TODO
+      else # B 生まれた日が節入り後の場合  (誕生月の日数―誕生日＋１＋翌月の節入り日)÷３
+        s = days_of_current_month - birth_dt[2] + 1 + setsuiri_of_next_month[0]
+        year = (s / 3.0).round
+      end
+    else
+      order = "逆行"
+      if setsuiri?
+        year = nil # TODO
+      else
+        year = (zokan_number / 3.0).round
+      end
+    end
+    return [order,year]
   end
 end
 

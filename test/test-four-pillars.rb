@@ -158,3 +158,30 @@ assert([[1,2]],fp.shukumei_daihankai)
 fp = FourPillarsLogic.new(["1960","4","29","10","00"],"m")
 puts fp.input
 assert([[1,2]],fp.shukumei_daihankai)
+
+# 大運
+fp = FourPillarsLogic.new(["1980","1","1","10","00"],"o")
+puts fp.input
+assert([nil,nil],fp.taiun)
+
+fp = FourPillarsLogic.new(["2021","1","1","10","00"],"f")
+puts fp.input
+assert(["己酉","戊子","庚子"],fp.kanshi)
+assert("+金",fp.gogyo_jikkan[2])
+assert(26,fp.zokan_number)
+assert(false,fp.setsuiri?)
+assert(['逆行',9],fp.taiun)
+
+fp = FourPillarsLogic.new(["2021","2","15","10","00"],"m")
+puts fp.input
+assert(["甲午","庚寅","辛丑"],fp.kanshi)
+assert("-金",fp.gogyo_jikkan[2])
+assert(['逆行',4],fp.taiun)
+
+fp = FourPillarsLogic.new(["1948","12","6","10","00"],"m")
+puts fp.input
+assert(false,fp.setsuiri?)
+assert([7,818],fp.setsuiri)
+assert("癸亥",fp.kanshi[1])
+assert("+土",fp.gogyo_jikkan[2])
+assert(['順行',1],fp.taiun)

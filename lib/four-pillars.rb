@@ -84,6 +84,33 @@ class FourPillarsLogic
   end
   SETSUIRI_HASH, SETSUIRI_LIST = load_setsuiri
 
+  # 通変星
+  def self.tsuhensei(j_day,j_src) # 日柱の十干、月柱または年柱の十干
+    j = JIKKAN.index(j_day)
+    if j % 2 == 0 # 陽
+      jikkan = JIKKAN
+    else # 陰
+      jikkan = JIKKAN_IN
+    end
+    t = jikkan.index(j_src) - jikkan.index(j_day)
+    t += 10 if t < 0
+    TSUHENSEI[t]
+  end
+
+  def self.jyuniunsei(j_day,j_src) # 日柱の十干, 十二支
+    j = JIKKAN.index(j_day)
+    if j % 2 == 0 # 陽
+      jyunishi = JYUNISHI
+    else # 陰
+      jyunishi = JYUNISHI_IN
+    end
+    offset = [1,7,10,10,10,10,7,1,4,4][j] # 十二運表より求めたオフセット
+    ji = jyunishi.index(j_src)
+    JYUNIUNSEI[(ji + offset) % 12]
+  end
+
+  # TODO エネルギー
+
   # 生年月日時間, 性別(大運の向きに使用)
   attr_reader :birth_dt,:gender
 
@@ -231,20 +258,9 @@ class FourPillarsLogic
 
   # 通変星(nil,月,年)
   def tsuhensei
-    j = JIKKAN.index(kanshi[0][0])
-    if j % 2 == 0 # 陽
-      jikkan = JIKKAN
-    else # 陰
-      jikkan = JIKKAN_IN
-    end
-    j = jikkan.index(kanshi[0][0])
-    j_month = jikkan.index(kanshi[1][0])
-    j_year = jikkan.index(kanshi[2][0])
-    t_month = j_month - j
-    t_month += 10 if t_month < 0
-    t_year = j_year - j
-    t_year += 10 if t_year < 0
-    [nil,TSUHENSEI[t_month],TSUHENSEI[t_year]]
+    m = FourPillarsLogic::tsuhensei(kanshi[0][0],kanshi[1][0])
+    y = FourPillarsLogic::tsuhensei(kanshi[0][0],kanshi[2][0])
+    [nil,m,y]
   end
 
   # 蔵干通変星
@@ -270,20 +286,10 @@ class FourPillarsLogic
 
   # 十二運星
   def jyuniunsei
-    j = JIKKAN.index(kanshi[0][0])
-    if j % 2 == 0 # 陽
-      jyunishi = JYUNISHI
-    else # 陰
-      jyunishi = JYUNISHI_IN
-    end
-    offset = [1,7,10,10,10,10,7,1,4,4][j] # 十二運表より求めたオフセット
-    j_day = jyunishi.index(kanshi[0][1])
-    j_month = jyunishi.index(kanshi[1][1])
-    j_year = jyunishi.index(kanshi[2][1])
-    u_day = (j_day + offset) % 12
-    u_month = (j_month + offset) % 12
-    u_year = (j_year + offset) % 12
-    [JYUNIUNSEI[u_day],JYUNIUNSEI[u_month],JYUNIUNSEI[u_year]]
+    d = FourPillarsLogic::jyuniunsei(kanshi[0][0],kanshi[0][1])
+    m = FourPillarsLogic::jyuniunsei(kanshi[0][0],kanshi[1][1])
+    y = FourPillarsLogic::jyuniunsei(kanshi[0][0],kanshi[2][1])
+    [d,m,y]
   end
 
   def jyuniunsei_energy
@@ -456,6 +462,33 @@ class FourPillarsLogic
       end
     end
     return [order,year]
+  end
+
+  def taiun_table
+    order,year = taiun
+    return [] if order.nil?
+    d = order == '順行' ? 1 : -1
+    j_day = kanshi[0][0] # 日柱の十干
+    k = kanshi_as_number[1] - 1 # 月柱の干支番号
+    rows = []
+    # [0,1,"癸亥","偏印","死",2]
+    y1, y2 = 0, year
+    8.times do |i|
+      k_month = KANSHI_ARRAY[k] # 月柱の干支
+      t = FourPillarsLogic::tsuhensei(j_day,k_month[0])
+      j = FourPillarsLogic::jyuniunsei(j_day,k_month[1])
+      je = JYUNIUNSEI_ENERGY[j]
+      rows += [[y1,y2,k_month,t,j,je]]
+      if y1 == 0
+        y1 = year
+      else
+        y1 += 10
+      end
+      y2 += 10
+      k += d
+      k = 0 if k < 0 || 59 < k
+    end
+    return rows
   end
 end
 

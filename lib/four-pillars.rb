@@ -486,7 +486,8 @@ class FourPillarsLogic
       end
       y2 += 10
       k += d
-      k = 0 if k < 0 || 59 < k
+      k = 59 if k < 0
+      k = 0 if k > 59
     end
     return rows
   end

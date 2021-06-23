@@ -224,3 +224,8 @@ assert(['逆行',1],fp.taiun)
 fp = FourPillarsLogic.new(["1948","12","7","13","39"],"f")
 puts fp.input
 assert(['逆行',1],fp.taiun)
+
+fp = FourPillarsLogic.new(["1979","1","17","10","00"],"f")
+puts fp.input
+assert(['逆行',4],fp.taiun)
+assert([64, 74, "戊午", "偏財", "死", 2],fp.taiun_table[7])

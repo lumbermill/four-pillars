@@ -86,8 +86,7 @@ class FourPillarsLogic
 
   # 通変星
   def self.tsuhensei(j_day,j_src) # 日柱の十干、月柱または年柱の十干
-    j = JIKKAN.index(j_day)
-    if j % 2 == 0 # 陽
+    if plus_jikkan?(j_day) # 陽
       jikkan = JIKKAN
     else # 陰
       jikkan = JIKKAN_IN
@@ -109,10 +108,15 @@ class FourPillarsLogic
     JYUNIUNSEI[(ji + offset) % 12]
   end
 
-  # TODO エネルギー
+  # 十干の陰陽 陽:true 陰:false
+  def self.plus_jikkan?(jikkan)
+    i = JIKKAN.index(jikkan)
+    raise "Invalid jikkan: #{jikkan}" if i.nil?
+    return i % 2 == 0
+  end
 
   # 生年月日時間, 性別(大運の向きに使用)
-  attr_reader :birth_dt,:gender
+  attr_reader :birth_dt, :gender
 
   def initialize(birth_dt,gender)
     @birth_dt = birth_dt.map {|v| v.to_i }
@@ -292,6 +296,7 @@ class FourPillarsLogic
     [d,m,y]
   end
 
+  # 十二運星エネルギー
   def jyuniunsei_energy
     jyuniunsei.map {|v| JYUNIUNSEI_ENERGY[v] }
   end

@@ -17,6 +17,8 @@ end
 # Test internal methods.
 assert(1,FourPillarsLogic::KANSHI_HASH["甲子"])
 assert(60,FourPillarsLogic::KANSHI_HASH["癸亥"])
+assert(true,FourPillarsLogic::plus_jikkan?("丙"))
+assert(false,FourPillarsLogic::plus_jikkan?("丁"))
 
 # Test entire the object.
 fp = FourPillarsLogic.new(["1984","2","15","4","15"],"f")

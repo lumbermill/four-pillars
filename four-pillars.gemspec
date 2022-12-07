@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'four-pillars'
-  s.version     = '0.1.9'
-  s.date        = '2022-11-03'
+  s.version     = '0.1.10'
+  s.date        = '2022-12-07'
   s.summary     = "Four Pillar astrology"
   s.description = "A class which tells fortune by Four Pillar astrology(四柱推命)."
   s.authors     = ["Yosei Ito"]

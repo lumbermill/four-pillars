@@ -29,7 +29,8 @@ See test cases for more methods.
 
 
 ## Changelog
-
+- 0.1.12 Fixed wrong shugoshins.
+- 0.1.11 Fixed wrong shugoshins.
 - 0.1.10 Update setsuiri time on 2022 Feb. 11:42->11:43 [国立天文台 令和 5年(2023) 暦要項](https://eco.mtk.nao.ac.jp/koyomi/yoko/2023/rekiyou232.html)
 
 ## Contributors

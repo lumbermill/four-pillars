@@ -118,12 +118,17 @@ class FourPillarsLogic
   # 生年月日時間, 性別(大運の向きに使用)
   attr_reader :birth_dt, :gender
 
-  def initialize(birth_dt,gender)
-    @birth_dt = birth_dt.map {|v| v.to_i }
+  def initialize(birth_dt,gender,with_time:false)
+    @birth_dt = birth_dt.map {|v| v.nil? ? nil : v.to_i }
     @gender = gender
+    @with_time = with_time
     raise "Incorrect birth date: #{birth_dt}" if @birth_dt.count != 5
     raise "Gender must be m,f or o(other): #{gender}" unless ['o','m','f'].include? @gender
     raise "Year must be larger than 1863" if @birth_dt[0] < 1864
+    h = @birth_dt[3]
+    if !h.nil? && (h < 0 || h > 23)
+      raise "Invalid hour: #{birth_dt}"
+    end
   end
 
   # 生年月日と性別
@@ -137,7 +142,12 @@ class FourPillarsLogic
     else
       g = ""
     end
-    "#{y}年#{m}月#{d}日#{h}時#{i}分生 #{g}"
+    if h.nil? || i.nil?
+      t = ""
+    else
+      t = "#{h}時#{i}分"
+    end
+    "#{y}年#{m}月#{d}日#{t}生 #{g}"
   end
 
   # 前月の日数
@@ -196,7 +206,8 @@ class FourPillarsLogic
     setsuiri[0] == d
   end
 
-  # 干支(日,月,年)
+  # 干支((時,)日,月,年)
+  # with_time=trueの時、時柱を含め長さ4の配列を返す
   def kanshi
     y,m,d,h,i = @birth_dt
     sd, st = setsuiri
@@ -206,7 +217,17 @@ class FourPillarsLogic
     md -= 1 if d < sd || (d == sd && h*60+i < st)
     dd = Date.new(y,m,d) - Date.new(1863,12,31) # 1923.10.18 = 甲子
 
-    return [KANSHI_ARRAY[dd % 60],KANSHI_ARRAY[md % 60],KANSHI_ARRAY[yd % 60]]
+    return [KANSHI_ARRAY[dd % 60],KANSHI_ARRAY[md % 60],KANSHI_ARRAY[yd % 60]] unless @with_time
+
+    dp = KANSHI_ARRAY[dd % 60] # 日柱
+    if h.nil?
+      tp = nil
+    else
+      jyunishi_idx = h == 23 ? 0 : ((h + 1) / 2)
+      jikkan_idx = ((JIKKAN.index(dp[0]) % 5) * 2 + jyunishi_idx) % 10
+      tp = JIKKAN[jikkan_idx] + JYUNISHI[jyunishi_idx]
+    end
+    return [tp,dp,KANSHI_ARRAY[md % 60],KANSHI_ARRAY[yd % 60]]
   end
 
   # 干支(数字)

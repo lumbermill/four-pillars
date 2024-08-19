@@ -231,3 +231,15 @@ fp = FourPillarsLogic.new(["1979","1","17","10","00"],"f")
 puts fp.input
 assert(['逆行',4],fp.taiun)
 assert([64, 74, "戊午", "偏財", "死", 2],fp.taiun_table[7])
+
+# 時柱のテスト
+fp = FourPillarsLogic.new(["1998","2","27","10","31"],"f",with_time:true)
+puts fp.input
+assert(["辛巳","乙巳","甲寅","戊寅"],fp.kanshi)
+
+# 時刻不明の場合
+fp = FourPillarsLogic.new(["1984","2","15",nil,nil],"f",with_time:true)
+puts fp.input
+assert([nil,"己卯","丙寅","甲子"],fp.kanshi)
+
+puts "Fin."

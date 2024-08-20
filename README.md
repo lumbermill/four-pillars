@@ -23,12 +23,18 @@ p fp.zokan
 #=> ["癸", "乙", "壬"]
 p fp.setsuiri?
 #=> false
+
+# 0.1.13から時柱に対応
+fp = FourPillarsLogic.new(["1998","2","27","10","31"],"f",with_time:true)
+fp.kanshi
+#=> ["辛巳","乙巳","甲寅","戊寅"]
 ```
 
 See test cases for more methods.
 
 
 ## Changelog
+- 0.1.13 beta: Added time pillar(時柱) feature.
 - 0.1.12 Fixed wrong shugoshins.
 - 0.1.11 Fixed wrong shugoshins.
 - 0.1.10 Update setsuiri time on 2022 Feb. 11:42->11:43 [国立天文台 令和 5年(2023) 暦要項](https://eco.mtk.nao.ac.jp/koyomi/yoko/2023/rekiyou232.html)

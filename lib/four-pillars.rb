@@ -283,49 +283,83 @@ class FourPillarsLogic
 
   # 通変星(nil,月,年)
   def tsuhensei
-    m = FourPillarsLogic::tsuhensei(kanshi[0][0],kanshi[1][0])
-    y = FourPillarsLogic::tsuhensei(kanshi[0][0],kanshi[2][0])
-    [nil,m,y]
+    if @with_time
+      m = FourPillarsLogic::tsuhensei(kanshi[1][0],kanshi[2][0])
+      y = FourPillarsLogic::tsuhensei(kanshi[1][0],kanshi[3][0])
+      t = FourPillarsLogic::tsuhensei(kanshi[1][0],kanshi[0][0])
+      [t,nil,m,y]
+    else
+      m = FourPillarsLogic::tsuhensei(kanshi[0][0],kanshi[1][0])
+      y = FourPillarsLogic::tsuhensei(kanshi[0][0],kanshi[2][0])
+      [nil,m,y]
+    end
   end
 
   # 蔵干通変星
   def zokan_tsuhensei
-    j = JIKKAN.index(kanshi[0][0])
-    if j % 2 == 0 # 陽
-      jikkan = JIKKAN
-    else # 陰
-      jikkan = JIKKAN_IN
+    if @with_time
+      j = JIKKAN.index(kanshi[1][0])
+      if j % 2 == 0 # 陽
+        jikkan = JIKKAN
+      else # 陰
+        jikkan = JIKKAN_IN
+      end
+      j = jikkan.index(kanshi[1][0])
+      j_time = jikkan.index(zokan[0])
+      j_day = jikkan.index(zokan[1])
+      j_month = jikkan.index(zokan[2])
+      j_year = jikkan.index(zokan[3])
+      t_time = j_time - j
+      t_time += 10 if t_time < 0
+      t_day = j_day - j
+      t_day += 10 if t_day < 0
+      t_month = j_month - j
+      t_month += 10 if t_month < 0
+      t_year = j_year - j
+      t_year += 10 if t_year < 0
+      [TSUHENSEI[t_time],TSUHENSEI[t_day],TSUHENSEI[t_month],TSUHENSEI[t_year]]
+    else
+      j = JIKKAN.index(kanshi[0][0])
+      if j % 2 == 0 # 陽
+        jikkan = JIKKAN
+      else # 陰
+        jikkan = JIKKAN_IN
+      end
+      j = jikkan.index(kanshi[0][0])
+      j_day = jikkan.index(zokan[0])
+      j_month = jikkan.index(zokan[1])
+      j_year = jikkan.index(zokan[2])
+      t_day = j_day - j
+      t_day += 10 if t_day < 0
+      t_month = j_month - j
+      t_month += 10 if t_month < 0
+      t_year = j_year - j
+      t_year += 10 if t_year < 0
+      [TSUHENSEI[t_day],TSUHENSEI[t_month],TSUHENSEI[t_year]]
     end
-    j = jikkan.index(kanshi[0][0])
-    j_day = jikkan.index(zokan[0])
-    j_month = jikkan.index(zokan[1])
-    j_year = jikkan.index(zokan[2])
-    t_day = j_day - j
-    t_day += 10 if t_day < 0
-    t_month = j_month - j
-    t_month += 10 if t_month < 0
-    t_year = j_year - j
-    t_year += 10 if t_year < 0
-    [TSUHENSEI[t_day],TSUHENSEI[t_month],TSUHENSEI[t_year]]
   end
 
   # 十二運星
   def jyuniunsei
-    d = FourPillarsLogic::jyuniunsei(kanshi[0][0],kanshi[0][1])
-    m = FourPillarsLogic::jyuniunsei(kanshi[0][0],kanshi[1][1])
-    y = FourPillarsLogic::jyuniunsei(kanshi[0][0],kanshi[2][1])
-    [d,m,y]
+    o = @with_time ? 1 : 0
+    d = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[0 + o][1])
+    m = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[1 + o][1])
+    y = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[2 + o][1])
+    return [d,m,y] unless @with_time
+    t = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[0][1])
+    [t,d,m,y]
   end
 
-  # 十二運星エネルギー
+  # 十二運星エネルギー 時中は使わない? 
   def jyuniunsei_energy
     jyuniunsei.map {|v| JYUNIUNSEI_ENERGY[v] }
   end
 
   # 空亡 = 天中殺
   def kuubou
-    k_day = (kanshi_as_number[0] - 1) / 10
-    k_year = (kanshi_as_number[2] - 1) / 10
+    o = @with_time ? 1 : 0
+    k_day = (kanshi_as_number[0 + o] - 1) / 10
+    k_year = (kanshi_as_number[2 + o] - 1) / 10
     [KUUBOU[k_day],KUUBOU[k_year]]
   end
 
@@ -345,7 +379,7 @@ class FourPillarsLogic
   # 五行(十干)
   def gogyo_jikkan
     arr = []
-    3.times do |i|
+    kanshi.length.times do |i|
       j = JIKKAN.index(kanshi[i][0])
       arr += [(j % 2 == 0 ? "+" : "-") + GOGYO[j / 2]]
     end
@@ -356,7 +390,7 @@ class FourPillarsLogic
   def gogyo_jyunishi
     arr = []
     gogyo_j = ["水","土","木","木","土","火","火","土","金","金","土","水"]
-    3.times do |i|
+    kanshi.length.times do |i|
       j = JYUNISHI.index(kanshi[i][1])
       arr += [(j % 2 == 0 ? "+" : "-") + gogyo_j[j]]
     end

@@ -257,7 +257,7 @@ class FourPillarsLogic
     zn = zokan_number
     z = []
     kanshi.each do |k|
-      j = k[1] # 十二支
+      j = k&.slice(1) # 十二支
       if zokan_hash1.keys.include? j
         z += [zokan_hash1[j]]
       elsif zokan_hash2.keys.include? j
@@ -276,6 +276,8 @@ class FourPillarsLogic
         else
           z += [arr[4]]
         end
+      else # j == nil
+        z += [nil]
       end
     end
     return z
@@ -283,14 +285,18 @@ class FourPillarsLogic
 
   # 通変星(nil,月,年)
   def tsuhensei
+    o = @with_time ? 1 : 0
+    m = FourPillarsLogic::tsuhensei(kanshi[o][0],kanshi[o + 1][0])
+    y = FourPillarsLogic::tsuhensei(kanshi[o][0],kanshi[o + 2][0])
     if @with_time
-      m = FourPillarsLogic::tsuhensei(kanshi[1][0],kanshi[2][0])
-      y = FourPillarsLogic::tsuhensei(kanshi[1][0],kanshi[3][0])
-      t = FourPillarsLogic::tsuhensei(kanshi[1][0],kanshi[0][0])
+      tk = kanshi[0]&.slice(0)
+      if tk.nil?
+        t = nil
+      else
+        t = FourPillarsLogic::tsuhensei(kanshi[o][0],tk)
+      end
       [t,nil,m,y]
     else
-      m = FourPillarsLogic::tsuhensei(kanshi[0][0],kanshi[1][0])
-      y = FourPillarsLogic::tsuhensei(kanshi[0][0],kanshi[2][0])
       [nil,m,y]
     end
   end
@@ -309,15 +315,19 @@ class FourPillarsLogic
       j_day = jikkan.index(zokan[1])
       j_month = jikkan.index(zokan[2])
       j_year = jikkan.index(zokan[3])
-      t_time = j_time - j
-      t_time += 10 if t_time < 0
+      if j_time.nil?
+        t_time = nil
+      else
+        t_time = j_time - j
+        t_time += 10 if t_time < 0
+      end
       t_day = j_day - j
       t_day += 10 if t_day < 0
       t_month = j_month - j
       t_month += 10 if t_month < 0
       t_year = j_year - j
       t_year += 10 if t_year < 0
-      [TSUHENSEI[t_time],TSUHENSEI[t_day],TSUHENSEI[t_month],TSUHENSEI[t_year]]
+      [(t_time.nil? ? nil : TSUHENSEI[t_time]),TSUHENSEI[t_day],TSUHENSEI[t_month],TSUHENSEI[t_year]]
     else
       j = JIKKAN.index(kanshi[0][0])
       if j % 2 == 0 # 陽
@@ -346,7 +356,11 @@ class FourPillarsLogic
     m = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[1 + o][1])
     y = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[2 + o][1])
     return [d,m,y] unless @with_time
-    t = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[0][1])
+    if @birth_dt[3].nil? # when hour is nil
+      t = nil
+    else
+      t = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[0][1])
+    end
     [t,d,m,y]
   end
 
@@ -361,6 +375,11 @@ class FourPillarsLogic
     k_day = (kanshi_as_number[0 + o] - 1) / 10
     k_year = (kanshi_as_number[2 + o] - 1) / 10
     [KUUBOU[k_day],KUUBOU[k_year]]
+  end
+
+  # 日柱のインデックス 時柱を求める場合は1になる
+  def offset_for_day
+    @with_time ? 1 : 0
   end
 
   # テーブル表示用に配列にして返す (デバッグ用)
@@ -380,8 +399,13 @@ class FourPillarsLogic
   def gogyo_jikkan
     arr = []
     kanshi.length.times do |i|
-      j = JIKKAN.index(kanshi[i][0])
-      arr += [(j % 2 == 0 ? "+" : "-") + GOGYO[j / 2]]
+      k = kanshi[i]&.slice(0)
+      if k.nil?
+        arr += [nil]
+      else
+        j = JIKKAN.index(k)
+        arr += [(j % 2 == 0 ? "+" : "-") + GOGYO[j / 2]]
+      end
     end
     return arr
   end
@@ -391,8 +415,13 @@ class FourPillarsLogic
     arr = []
     gogyo_j = ["水","土","木","木","土","火","火","土","金","金","土","水"]
     kanshi.length.times do |i|
-      j = JYUNISHI.index(kanshi[i][1])
-      arr += [(j % 2 == 0 ? "+" : "-") + gogyo_j[j]]
+      jj = kanshi[i]&.slice(1)
+      if jj.nil?
+        arr += [nil]
+      else
+        j = JYUNISHI.index(jj)
+        arr += [(j % 2 == 0 ? "+" : "-") + gogyo_j[j]]
+      end
     end
     return arr
   end
@@ -400,8 +429,8 @@ class FourPillarsLogic
   # 守護神
   def shugoshin
     # 日柱の十干と月柱の十二支
-    x = JIKKAN.index(kanshi[0][0])
-    y = JYUNISHI.index(kanshi[1][1])
+    x = JIKKAN.index(kanshi[0 + offset_for_day][0])
+    y = JYUNISHI.index(kanshi[1 + offset_for_day][1])
     SHUGOSHIN[y][x].split("")
   end
 
@@ -409,7 +438,9 @@ class FourPillarsLogic
   def shukumei
     s = []
     t = kuubou # 天中殺 0:上段, 1:下段
-    k = kanshi.map {|v| v[1] } # 日,月,年柱の干支
+    ka = kanshi
+    ka.delete_at(0) if @with_time
+    k = ka.map {|v| v[1] } # 日,月,年柱の干支
     if t[0].include? k[2]
       s += ["生年中殺"]
     end
@@ -427,10 +458,10 @@ class FourPillarsLogic
   end
 
   def equivalent_kanshi(only_jikkan=false)
+    k = kanshi
+    k.delete_at(0) if @with_time
     if only_jikkan
-      k = kanshi.map {|v| v[0] } # 日,月,年柱の十干
-    else
-      k = kanshi
+      k = k.map {|v| v[0] } # 日,月,年柱の十干
     end
     if k[0] == k[1] && k[1] == k[2]
       return [[0,1],[0,2],[1,2]]
@@ -462,8 +493,8 @@ class FourPillarsLogic
     v = []
     eq = equivalent_kanshi(true)
     eq.each do |e|
-      k0 = kanshi[e[0]][1]
-      k1 = kanshi[e[1]][1]
+      k0 = kanshi[e[0] + offset_for_day][1]
+      k1 = kanshi[e[1] + offset_for_day][1]
       v += [e] if on_distance?(k0,k1,6)
     end
     return v
@@ -475,13 +506,13 @@ class FourPillarsLogic
     v = []
     eq = equivalent_kanshi(true)
     eq.each do |e|
-      k0 = kanshi[e[0]][1]
-      k1 = kanshi[e[1]][1]
+      k0 = kanshi[e[0] + offset_for_day][1]
+      k1 = kanshi[e[1] + offset_for_day][1]
       v += [e] if on_distance?(k0,k1,4)
     end
     eq.each do |e|
-      k0 = kanshi[e[0]][1]
-      k1 = kanshi[e[1]][1]
+      k0 = kanshi[e[0] + offset_for_day][1]
+      k1 = kanshi[e[1] + offset_for_day][1]
       v += [e] if on_distance?(k0,k1,8)
     end
     return v
@@ -491,6 +522,7 @@ class FourPillarsLogic
   def taiun
     return [nil,nil] unless ['m','f'].include? @gender
     k = gogyo_jikkan[2][0]
+    # TODO: 時刻不明の場合は？
     t = @birth_dt[3] * 60 + @birth_dt[4] # 生まれた時間
     if (@gender == 'm' && k == "+") || (@gender == 'f' && k == '-')
       order = "順行"

@@ -248,10 +248,21 @@ assert([7,7,12,12],fp.jyuniunsei_energy)
 assert(38,fp.jyuniunsei_energy.sum)
 assert(["寅卯","申酉"],fp.kuubou)
 
-
 # 時刻不明の場合
-fp = FourPillarsLogic.new(["1984","2","15",nil,nil],"f",with_time:true)
+fp = FourPillarsLogic.new(["1998","2","27",nil,nil],"f",with_time:true)
 puts fp.input
-assert([nil,"己卯","丙寅","甲子"],fp.kanshi)
-
+assert([nil,"乙巳","甲寅","戊寅"],fp.kanshi)
+assert([nil,"-木","+木","+土"],fp.gogyo_jikkan)
+assert([nil,"-火","+木","+木"],fp.gogyo_jyunishi)
+assert([nil,42,51,15],fp.kanshi_as_number)
+assert(24,fp.zokan_number)
+assert([nil,"丙","甲","甲"],fp.zokan)
+assert([nil, nil,"劫財","正財"],fp.tsuhensei)
+assert([nil,"傷官","劫財","劫財"],fp.zokan_tsuhensei)
+assert([nil,"沐浴","帝旺","帝旺"],fp.jyuniunsei)
+assert([nil,7,12,12],fp.jyuniunsei_energy)
+assert(31,fp.jyuniunsei_energy.compact.sum)  # need to remove nil
+assert(["寅卯","申酉"],fp.kuubou)
+assert(["丙","癸"],fp.shugoshin)
+assert(["生年中殺", "生月中殺"],fp.shukumei)
 puts "Fin."

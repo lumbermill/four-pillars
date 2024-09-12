@@ -51,8 +51,20 @@ class FourPillarsLogic
     end
     return j
   end
+
+  # 隠 通変星
+  def self.tushensei_in
+    t = [nil] * 10
+    [0,2,4,6,8].each do |i|
+      t[i] = TSUHENSEI[i+1]
+      t[i+1] = TSUHENSEI[i]
+    end
+    return t
+  end
   JIKKAN_IN = jikkan_in
   JYUNISHI_IN = JYUNISHI.reverse
+  TSUHENSEI_IN = tushensei_in
+  JYUNIUNSEI_IN = JYUNIUNSEI.reverse
 
   # 十二運星エネルギー
   def self.jyuniunsei_energy

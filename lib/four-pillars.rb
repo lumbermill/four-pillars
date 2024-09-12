@@ -572,8 +572,8 @@ class FourPillarsLogic
     order,year = taiun
     return [] if order.nil?
     d = order == '順行' ? 1 : -1
-    j_day = kanshi[0][0] # 日柱の十干
-    k = kanshi_as_number[1] - 1 # 月柱の干支番号
+    j_day = kanshi[offset_for_day][0] # 日柱の十干
+    k = kanshi_as_number[offset_for_day + 1] - 1 # 月柱の干支番号
     rows = []
     # [0,1,"癸亥","偏印","死",2]
     y1, y2 = 0, year

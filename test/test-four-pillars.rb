@@ -248,6 +248,20 @@ assert([7,7,12,12],fp.jyuniunsei_energy)
 assert(38,fp.jyuniunsei_energy.sum)
 assert(["寅卯","申酉"],fp.kuubou)
 
+fp = FourPillarsLogic.new(["1984","2","15","4","15"],"f",with_time:true)
+assert(["丙寅","己卯","丙寅","甲子"],fp.kanshi)
+assert(["+火","-土","+火","+木"],fp.gogyo_jikkan)
+assert(["+木","-木","+木","+水"],fp.gogyo_jyunishi)
+assert([3,16,3,1],fp.kanshi_as_number)
+assert(11,fp.zokan_number)
+assert(["丙","乙","丙","癸"],fp.zokan)
+assert(["印綬", nil,"印綬","正官"],fp.tsuhensei)
+assert(["印綬","偏官","印綬","偏財"],fp.zokan_tsuhensei)
+assert(["死","病","死","絶"],fp.jyuniunsei)
+assert([2,4,2,1],fp.jyuniunsei_energy)
+assert(9,fp.jyuniunsei_energy.sum)
+assert(["申酉","戌亥"],fp.kuubou)
+
 # 時刻不明の場合
 fp = FourPillarsLogic.new(["1998","2","27",nil,nil],"f",with_time:true)
 puts fp.input

@@ -130,15 +130,16 @@ class FourPillarsLogic
   # 生年月日時間, 性別(大運の向きに使用)
   attr_reader :birth_dt, :gender
 
-  def initialize(birth_dt,gender,with_time:false)
-    @birth_dt = birth_dt.map {|v| v.nil? ? nil : v.to_i }
+  def initialize(birth_dt,gender,with_time:false,know_time:true)
+    @birth_dt = birth_dt.map {|v| v.to_i } # 時分がnilの場合、0になる
     @gender = gender
     @with_time = with_time
+    @know_time = know_time && birth_dt[3] != nil
     raise "Incorrect birth date: #{birth_dt}" if @birth_dt.count != 5
     raise "Gender must be m,f or o(other): #{gender}" unless ['o','m','f'].include? @gender
     raise "Year must be larger than 1863" if @birth_dt[0] < 1864
     h = @birth_dt[3]
-    if !h.nil? && (h < 0 || h > 23)
+    if h < 0 || h > 23
       raise "Invalid hour: #{birth_dt}"
     end
   end
@@ -154,10 +155,10 @@ class FourPillarsLogic
     else
       g = ""
     end
-    if h.nil? || i.nil?
-      t = ""
-    else
+    if @know_time
       t = "#{h}時#{i}分"
+    else
+      t = ""
     end
     "#{y}年#{m}月#{d}日#{t}生 #{g}"
   end
@@ -223,6 +224,10 @@ class FourPillarsLogic
   def kanshi
     y,m,d,h,i = @birth_dt
     sd, st = setsuiri
+    if d == sd 
+      # puts "d=#{d}, h=#{h}, i=#{i}"
+    end
+
     yd = y - 1864 # (till 1865.02.0?) = 甲子
     yd -= 1 if m < 2 || (m == 2 && d < sd) || (m == 2 && d == sd && h*60+i < st)
     md = (y - 1863) * 12 + (m - 12) # (till 1864.01.05) = 甲子
@@ -232,12 +237,12 @@ class FourPillarsLogic
     return [KANSHI_ARRAY[dd % 60],KANSHI_ARRAY[md % 60],KANSHI_ARRAY[yd % 60]] unless @with_time
 
     dp = KANSHI_ARRAY[dd % 60] # 日柱
-    if h.nil?
-      tp = nil
-    else
+    if @know_time
       jyunishi_idx = h == 23 ? 0 : ((h + 1) / 2)
       jikkan_idx = ((JIKKAN.index(dp[0]) % 5) * 2 + jyunishi_idx) % 10
       tp = JIKKAN[jikkan_idx] + JYUNISHI[jyunishi_idx]
+    else
+      tp = nil
     end
     return [tp,dp,KANSHI_ARRAY[md % 60],KANSHI_ARRAY[yd % 60]]
   end
@@ -368,10 +373,10 @@ class FourPillarsLogic
     m = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[1 + o][1])
     y = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[2 + o][1])
     return [d,m,y] unless @with_time
-    if @birth_dt[3].nil? # when hour is nil
-      t = nil
-    else
+    if @know_time 
       t = FourPillarsLogic::jyuniunsei(kanshi[o][0],kanshi[0][1])
+    else
+      t = nil
     end
     [t,d,m,y]
   end
@@ -533,9 +538,8 @@ class FourPillarsLogic
   # 大運 [順行 or 逆行, year] or [nil,nil](if gender is not male nor female)
   def taiun
     return [nil,nil] unless ['m','f'].include? @gender
-    k = gogyo_jikkan[2][0]
-    # TODO: 時刻不明の場合は？
-    t = @birth_dt[3] * 60 + @birth_dt[4] # 生まれた時間
+    k = gogyo_jikkan[2 + offset_for_day][0]
+    t = @birth_dt[3] * 60 + @birth_dt[4].to_i # 生まれた時間
     if (@gender == 'm' && k == "+") || (@gender == 'f' && k == '-')
       order = "順行"
       d = setsuiri[0] - birth_dt[2]

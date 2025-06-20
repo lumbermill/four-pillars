@@ -360,4 +360,7 @@ assert(21,fp.jyuniunsei_energy.compact.sum)
 assert(["子丑","寅卯"],fp.kuubou)
 assert(["逆行",1],fp.taiun)
 
+fp = FourPillarsLogic.new(["1984","11","22","21","0"],"f",with_time:true,know_time:false)
+assert(["生年中殺","日座中殺"],fp.shukumei)  # 日座中殺の対象について指摘があったが、結局今の仕様のままで問題ないことに
+
 puts "Fin."

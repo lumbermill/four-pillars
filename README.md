@@ -34,6 +34,7 @@ See test cases for more methods.
 
 
 ## Changelog
+- 0.1.17 Fixed wrong taiun when time pillar is included.
 - 0.1.13 beta: Added time pillar(時柱) feature.
 - 0.1.12 Fixed wrong shugoshins.
 - 0.1.11 Fixed wrong shugoshins.

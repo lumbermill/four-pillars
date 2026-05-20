@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>四柱推命 Playground — four-pillars gem</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 1280px;
+      margin: 2em auto;
+      padding: 0 1em;
+      color: #222;
+      line-height: 1.6;
+    }
+    h1 { border-bottom: 2px solid #444; padding-bottom: 0.3em; }
+    h2 { margin-top: 1.5em; }
+    h3 { margin-top: 1.2em; color: #333; }
+    table { border-collapse: collapse; margin: 0.8em 0; width: auto; }
+    th, td { border: 1px solid #ccc; padding: 0.35em 0.8em; text-align: center; }
+    th { background: #f0f0f0; font-weight: bold; }
+    button {
+      padding: 0.5em 2.2em;
+      font-size: 1.05em;
+      cursor: pointer;
+      background: #2a5caa;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+    }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button:hover:not(:disabled) { background: #1e448a; }
+    #status { margin-left: 1em; color: #666; font-style: italic; font-size: 0.9em; }
+    fieldset { border: 1px solid #ccc; border-radius: 4px; margin: 0.6em 0; padding: 0.6em 1.2em; }
+    legend { font-weight: bold; padding: 0 0.4em; }
+    input[type="number"] { width: 4.2em; padding: 0.2em; }
+    label { margin-right: 1.2em; }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: 0.25em 1.2em; margin: 0.5em 0; }
+    dt { font-weight: bold; white-space: nowrap; }
+    .error { color: #c00; }
+    footer { margin-top: 3em; border-top: 1px solid #ddd; padding-top: 1em; font-size: 0.85em; color: #666; }
+
+    .columns {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 2.5em;
+      align-items: start;
+      margin-top: 1.5em;
+    }
+    #code-panel {
+      background: #1e1e2e;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    #code-panel-label {
+      background: #313244;
+      color: #a6adc8;
+      font-size: 0.78em;
+      padding: 0.4em 1em;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+    #code-preview {
+      margin: 0;
+      padding: 1em 1.2em;
+      color: #cdd6f4;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.82em;
+      line-height: 1.7;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    #output { margin-top: 1.5em; }
+  </style>
+</head>
+<body>
+
+<h1>四柱推命 Playground
+  <br><small style="font-size:0.55em;font-weight:normal;color:#666">
+    Four Pillar Astrology Calculator — powered by
+    <a href="https://github.com/lumbermill/four-pillars">four-pillars gem</a>
+    + <a href="https://ruby.github.io/ruby.wasm/">ruby.wasm</a>
+  </small>
+</h1>
+
+<p>生年月日・性別を入力して「鑑定する」をクリックしてください。インストール不要、ブラウザだけで動きます。<br>
+   <small>Enter your birth date and gender, then click the button. No install needed — runs entirely in-browser.</small></p>
+
+<div class="columns">
+  <div>
+    <form id="input-form" onsubmit="return false">
+      <fieldset>
+        <legend>生年月日時 / Birth date &amp; time</legend>
+        <label>年<input type="number" id="year"   value="1984" min="1873" max="2100"></label>
+        <label>月<input type="number" id="month"  value="2"    min="1"    max="12"></label>
+        <label>日<input type="number" id="day"    value="15"   min="1"    max="31"></label>
+        <label>時<input type="number" id="hour"   value="4"    min="0"    max="23"></label>
+        <label>分<input type="number" id="minute" value="15"   min="0"    max="59"></label>
+      </fieldset>
+      <fieldset>
+        <legend>性別 / Gender</legend>
+        <label><input type="radio" name="gender" value="f" checked> 女性 (Female)</label>
+        <label><input type="radio" name="gender" value="m"> 男性 (Male)</label>
+        <label><input type="radio" name="gender" value="o"> その他 (Other)</label>
+      </fieldset>
+      <label>
+        <input type="checkbox" id="with_time" checked>
+        時柱を使用 / Include time pillar
+      </label>
+      <br><br>
+      <button type="button" id="btn-calc" disabled>鑑定する ▶</button>
+      <span id="status">ruby.wasm を読み込み中... / Loading ruby.wasm...</span>
+    </form>
+  </div>
+
+  <div>
+    <div id="code-panel">
+      <div id="code-panel-label">example.rb</div>
+      <pre id="code-preview"></pre>
+    </div>
+    <div id="output"></div>
+  </div>
+</div>
+
+<footer>
+  <a href="https://github.com/lumbermill/four-pillars">four-pillars gem on GitHub</a> ·
+  <a href="https://rubygems.org/gems/four-pillars">RubyGems</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@ruby/4.0-wasm-wasi@2.8.1/dist/browser.script.iife.js"></script>
+<script type="text/ruby">
+  require "js"
+  require "stringio"
+
+  # Load a URL synchronously via XHR and return its text content.
+  # Works in browser (deprecation warning expected) and WASM context.
+  def xhr_get(url)
+    result = JS.eval(<<~JS)
+      (() => {
+        try {
+          const x = new XMLHttpRequest();
+          x.open("GET", "#{url}", false);
+          x.send();
+          return x.status >= 200 && x.status < 300 ? x.responseText : null;
+        } catch(e) { return null; }
+      })()
+    JS
+    result.typeof == "string" ? result.to_s : nil
+  end
+
+  # --- Load gem source from server (works on GitHub Pages and any HTTP server) ---
+  setsuiri_txt = xhr_get("../lib/four-pillars-setsuiri.txt")
+  raise "Failed to load setsuiri data" unless setsuiri_txt
+
+  fp_src = xhr_get("../lib/four-pillars.rb")
+  raise "Failed to load lib/four-pillars.rb" unless fp_src
+
+  # Patch the one file-system call so it reads from our pre-fetched string instead.
+  $__setsuiri_txt = setsuiri_txt
+  patched_src = fp_src.sub(
+    'open(__dir__+"/four-pillars-setsuiri.txt")',
+    'StringIO.new($__setsuiri_txt)'
+  )
+  eval(patched_src)
+
+  # --- Wire up the UI ---
+  document = JS.global[:document]
+
+  def build_code_text(document, fp = nil)
+    year   = document.getElementById("year")[:value].to_s
+    month  = document.getElementById("month")[:value].to_s
+    day    = document.getElementById("day")[:value].to_s
+    hour   = document.getElementById("hour")[:value].to_s
+    min_v  = document.getElementById("minute")[:value].to_s
+    gender = document.querySelector("input[name='gender']:checked")[:value].to_s
+    wt     = document.getElementById("with_time")[:checked].to_s == "true"
+    g_label = {"f" => "女性", "m" => "男性", "o" => "その他"}[gender] || gender
+
+    lines = []
+    lines << 'require "four-pillars"'
+    lines << ""
+    lines << "fp = FourPillarsLogic.new("
+    lines << "  [#{year}, #{month}, #{day}, #{hour}, #{min_v}],"
+    lines << "  #{gender.inspect},  # #{g_label}"
+    lines << "  with_time: #{wt}"
+    lines << ")"
+    lines << ""
+
+    methods = [
+      ["fp.input",        fp ? fp.input.inspect        : nil],
+      ["fp.kanshi",       fp ? fp.kanshi.inspect       : nil],
+      ["fp.tsuhensei",    fp ? fp.tsuhensei.inspect    : nil],
+      ["fp.jyuniunsei",   fp ? fp.jyuniunsei.inspect   : nil],
+      ["fp.zokan",        fp ? fp.zokan.inspect        : nil],
+      ["fp.gogyo_jikkan", fp ? fp.gogyo_jikkan.inspect : nil],
+      ["fp.kuubou",       fp ? fp.kuubou.inspect       : nil],
+      ["fp.shugoshin",    fp ? fp.shugoshin.inspect    : nil],
+      ["fp.taiun",        fp ? fp.taiun.inspect        : nil],
+    ]
+    pad = methods.map { |m, _| m.length }.max
+    methods.each do |meth, result|
+      lines << (result ? "p #{meth.ljust(pad)}  #=> #{result}" : "p #{meth}")
+    end
+
+    lines.join("\n")
+  end
+
+  document.getElementById("btn-calc")[:disabled] = false
+  document.getElementById("status")[:textContent] = "準備完了 — Ready"
+
+  form = document.getElementById("input-form")
+  refresh_code = -> (_e) { document.getElementById("code-preview")[:textContent] = build_code_text(document) }
+  form.addEventListener("input",  &refresh_code)
+  form.addEventListener("change", &refresh_code)
+  document.getElementById("code-preview")[:textContent] = build_code_text(document)
+
+  document.getElementById("btn-calc").addEventListener("click") do |_event|
+    document.getElementById("status")[:textContent] = "計算中... / Computing..."
+    document.getElementById("output")[:innerHTML] = ""
+
+    begin
+      year      = document.getElementById("year")[:value].to_i
+      month     = document.getElementById("month")[:value].to_i
+      day       = document.getElementById("day")[:value].to_i
+      hour      = document.getElementById("hour")[:value].to_i
+      min       = document.getElementById("minute")[:value].to_i
+      gender    = document.querySelector("input[name='gender']:checked")[:value].to_s
+      with_time = document.getElementById("with_time")[:checked].to_s == "true"
+
+      fp = FourPillarsLogic.new([year, month, day, hour, min], gender, with_time: with_time)
+
+      document.getElementById("code-preview")[:textContent] = build_code_text(document, fp)
+
+      pillar_labels = with_time ? %w[時柱 日柱 月柱 年柱] : %w[日柱 月柱 年柱]
+      nd = "—"
+
+      mk_row = ->(label, vals) {
+        "<tr><th>#{label}</th>" + vals.map { |v| "<td>#{v || nd}</td>" }.join + "</tr>"
+      }
+
+      chart_html =
+        "<table><thead><tr><th></th>" +
+        pillar_labels.map { |p| "<th>#{p}</th>" }.join +
+        "</tr></thead><tbody>" +
+        mk_row.("干支",       fp.kanshi) +
+        mk_row.("通変星",     fp.tsuhensei) +
+        mk_row.("十二運星",   fp.jyuniunsei) +
+        mk_row.("蔵干",       fp.zokan) +
+        mk_row.("五行(干)",   fp.gogyo_jikkan) +
+        mk_row.("五行(支)",   fp.gogyo_jyunishi) +
+        "</tbody></table>"
+
+      taiun_dir, taiun_start = fp.taiun
+      taiun_html = if taiun_dir.nil?
+        "<p><em>大運は「その他」性別では計算できません。</em></p>"
+      else
+        trows = fp.taiun_table.map { |from, to, ks, ts, jy, en|
+          "<tr><td>#{from}〜#{to}歳</td><td>#{ks}</td>" \
+          "<td>#{ts || nd}</td><td>#{jy}</td><td>#{en}</td></tr>"
+        }.join
+        "<h3>大運 / Great Fortune " \
+        "<small style='font-weight:normal'>(#{taiun_dir} · #{taiun_start}歳〜)</small></h3>" \
+        "<table><thead><tr><th>年齢</th><th>干支</th><th>通変星</th><th>十二運星</th><th>活力</th></tr></thead>" \
+        "<tbody>#{trows}</tbody></table>"
+      end
+
+      special_html =
+        "<h3>特殊情報 / Special Patterns</h3><dl>" \
+        "<dt>空亡（天中殺）</dt><dd>#{fp.kuubou.join(', ')}</dd>" \
+        "<dt>守護神</dt><dd>#{fp.shugoshin.join(', ')}</dd>" \
+        "</dl>"
+
+      document.getElementById("output")[:innerHTML] =
+        "<h2>#{fp.input}</h2>" \
+        "<h3>命式 / Birth Chart</h3>" + chart_html +
+        taiun_html + special_html
+
+      document.getElementById("status")[:textContent] = "完了 / Done"
+
+    rescue => e
+      document.getElementById("status")[:innerHTML] =
+        "<span class='error'>エラー / Error: #{e.class}: #{e.message}</span>"
+    end
+  end
+</script>
+</body>
+</html>

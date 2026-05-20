@@ -1,0 +1,13 @@
+{
+  "name": "four-pillars Ruby",
+  "image": "mcr.microsoft.com/devcontainers/ruby:3.4",
+  "postCreateCommand": "gem install four-pillars",
+  "customizations": {
+    "vscode": {
+      "extensions": ["shopify.ruby-lsp"],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}

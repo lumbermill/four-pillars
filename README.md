@@ -7,7 +7,6 @@ A Ruby library for calculating birth charts with Four Pillar astrology (四柱�
 [![CI](https://github.com/lumbermill/four-pillars/actions/workflows/ci.yml/badge.svg)](https://github.com/lumbermill/four-pillars/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Ruby](https://img.shields.io/badge/ruby-2.6%20%7C%202.7%20%7C%203.x%20%7C%204.0-red)](https://github.com/lumbermill/four-pillars)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/lumbermill/four-pillars)
 
 > **[▶ ブラウザで試す / Try it in your browser](https://lumbermill.github.io/four-pillars/)**  
 > インストール不要・ruby.wasm でその場で動きます / No install needed — runs via ruby.wasm
@@ -33,6 +32,9 @@ fp.jyuniunsei #=> ["病",   "死",   "絶"]
 fp.kuubou     #=> ["申酉", "戌亥"]
 fp.shugoshin  #=> ["丙", "甲"]
 ```
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/lumbermill/four-pillars)
+
 
 ## Output Example / 出力例
 

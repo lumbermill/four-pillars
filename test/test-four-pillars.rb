@@ -20,6 +20,24 @@ assert(60,FourPillarsLogic::KANSHI_HASH["癸亥"])
 assert(true,FourPillarsLogic::plus_jikkan?("丙"))
 assert(false,FourPillarsLogic::plus_jikkan?("丁"))
 
+# Test day pillar from a date. (日付だけで決まる日柱)
+assert("甲子",FourPillarsLogic::day_pillar_of(FourPillarsLogic::KANSHI_BASE_DATE))
+assert("甲子",FourPillarsLogic::day_pillar_of(Date.new(1923,10,18)))
+assert("乙丑",FourPillarsLogic::day_pillar_of(Date.new(1923,10,19)))
+assert("癸亥",FourPillarsLogic::day_pillar_of(Date.new(1923,10,17)))
+assert("甲申",FourPillarsLogic::day_pillar_of(Date.new(2026,9,7)))
+# 60日周期で一巡する
+assert("甲申",FourPillarsLogic::day_pillar_of(Date.new(2026,9,7)+60))
+# Time/DateTime も受け付ける (その日の日柱を返す)
+assert("甲申",FourPillarsLogic::day_pillar_of(Time.new(2026,9,7,23,41)))
+# 命式の日柱と一致する
+assert(FourPillarsLogic.new([1984,2,15,4,15],"f").kanshi[0],FourPillarsLogic::day_pillar_of(Date.new(1984,2,15)))
+
+# Test setsuiri of a year/month. (年月の節入り日時)
+assert([7,23*60+41],FourPillarsLogic::setsuiri_of(2026,9))
+assert([5,0*60+19],FourPillarsLogic::setsuiri_of(1984,2))
+assert(nil,FourPillarsLogic::setsuiri_of(2045,1))
+
 # Test entire the object.
 fp = FourPillarsLogic.new(["1984","2","15","4","15"],"f")
 puts fp.input

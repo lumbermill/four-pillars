@@ -162,6 +162,8 @@ FourPillarsLogic.new(birth_dt, gender, with_time: false, know_time: true)
 ```ruby
 FourPillarsLogic.kanshi_array          # 干支60種の配列
 FourPillarsLogic.kanshi_hash           # 干支 → 番号のHash
+FourPillarsLogic.day_pillar_of(date)   # 日付 → 日柱（その日の干支）
+FourPillarsLogic.setsuiri_of(y, m)     # 年月 → 節入り日時 [日, 時刻]（未登録は nil）
 FourPillarsLogic.tsuhensei(jikkan_day, jikkan_src)   # 通変星を計算
 FourPillarsLogic.jyuniunsei(jikkan_day, jyunishi_src) # 十二運星を計算
 FourPillarsLogic.plus_jikkan?(jikkan)  # 陽干かどうか
@@ -173,6 +175,7 @@ FourPillarsLogic.plus_jikkan?(jikkan)  # 陽干かどうか
 
 ## Changelog
 
+- **0.1.18** Added `day_pillar_of` / `setsuiri_of` class methods.
 - **0.1.17** Fixed wrong taiun when time pillar is included.
 - **0.1.13** Added time pillar (時柱) feature (`with_time: true`).
 - **0.1.12** Fixed wrong shugoshins.

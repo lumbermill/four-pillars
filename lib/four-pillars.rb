@@ -42,6 +42,16 @@ class FourPillarsLogic
   end
   KANSHI_HASH = kanshi_hash
 
+  # 日柱の基準日 (この日が甲子)
+  KANSHI_BASE_DATE = Date.new(1863,12,31)
+
+  # 日付に対応する日柱(その日の干支)
+  #   FourPillarsLogic.day_pillar_of(Date.new(2026,9,7)) #=> "甲申"
+  def self.day_pillar_of(date)
+    d = date.respond_to?(:to_date) ? date.to_date : date
+    KANSHI_ARRAY[(d - KANSHI_BASE_DATE).to_i % 60]
+  end
+
   # 陰干通表
   def self.jikkan_in
     j = [nil] * 10
@@ -95,6 +105,12 @@ class FourPillarsLogic
     return h, l
   end
   SETSUIRI_HASH, SETSUIRI_LIST = load_setsuiri
+
+  # 年月に対応する節入り日時 (注:時 = 時間 x 60 + 分) 登録がない場合は nil
+  #   FourPillarsLogic.setsuiri_of(2026,9) #=> [7, 1421]  (7日 23時41分)
+  def self.setsuiri_of(year,month)
+    SETSUIRI_HASH[year*100+month]
+  end
 
   # 通変星
   def self.tsuhensei(j_day,j_src) # 日柱の十干、月柱または年柱の十干
@@ -184,7 +200,7 @@ class FourPillarsLogic
     else
       m -= 1
     end
-    SETSUIRI_HASH[y*100+m] || [0,0]
+    self.class.setsuiri_of(y,m) || [0,0]
   end
 
   # 翌月の節入日
@@ -203,13 +219,13 @@ class FourPillarsLogic
   # このメソッドがfalseを返す場合、干支、蔵干が仮の節入日で計算されています。
   def know_setsuiri?
     y,m,d,h,i = @birth_dt
-    SETSUIRI_HASH.include? y*100+m
+    !self.class.setsuiri_of(y,m).nil?
   end
 
   # 生年月に対応する節入り日時 ファイルに登録がない場合は、4日12時を返す
   def setsuiri
     y,m,d,h,i = @birth_dt
-    SETSUIRI_HASH[y*100+m] || [4,12*60]
+    self.class.setsuiri_of(y,m) || [4,12*60]
   end
 
   # 生まれた日が節入日にあたる場合、true
@@ -232,11 +248,10 @@ class FourPillarsLogic
     yd -= 1 if m < 2 || (m == 2 && d < sd) || (m == 2 && d == sd && h*60+i < st)
     md = (y - 1863) * 12 + (m - 12) # (till 1864.01.05) = 甲子
     md -= 1 if d < sd || (d == sd && h*60+i < st)
-    dd = Date.new(y,m,d) - Date.new(1863,12,31) # 1923.10.18 = 甲子
+    dp = self.class.day_pillar_of(Date.new(y,m,d)) # 日柱
 
-    return [KANSHI_ARRAY[dd % 60],KANSHI_ARRAY[md % 60],KANSHI_ARRAY[yd % 60]] unless @with_time
+    return [dp,KANSHI_ARRAY[md % 60],KANSHI_ARRAY[yd % 60]] unless @with_time
 
-    dp = KANSHI_ARRAY[dd % 60] # 日柱
     if @know_time
       jyunishi_idx = h == 23 ? 0 : ((h + 1) / 2)
       jikkan_idx = ((JIKKAN.index(dp[0]) % 5) * 2 + jyunishi_idx) % 10
